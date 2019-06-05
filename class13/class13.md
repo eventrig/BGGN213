@@ -1,4 +1,4 @@
-Class 13: Structual Bioinformatics pt. 2
+Class 12: Structual Bioinformatics pt. 2
 ================
 
 ``` r
@@ -149,8 +149,8 @@ pdb2 <- read.pdb(file2)
 modes <- nma(pdb2)
 ```
 
-    ##  Building Hessian...     Done in 0.021 seconds.
-    ##  Diagonalizing Hessian...    Done in 0.091 seconds.
+    ##  Building Hessian...     Done in 0.019 seconds.
+    ##  Diagonalizing Hessian...    Done in 0.136 seconds.
 
 ``` r
 plot(modes, sse=pdb2)
