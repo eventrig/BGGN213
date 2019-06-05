@@ -1,0 +1,276 @@
+---
+title: "class07: R Functions and packages"
+author: "Emilya Ventriglia"
+date: "4/24/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## More on fucntion writting
+
+First we'll revisit our function from last class (class 6)
+```{r}
+source("http://tinyurl.com/rescale-R")
+```
+
+Test the **rescale()** function
+
+```{r}
+rescale(1:10)
+```
+
+```{r}
+x <- (c(1:10, "string"))
+!is.numeric(x)
+```
+
+```{r}
+rescale2 <- function(x, na.rm=TRUE, plot=FALSE, ...) {
+ if( !is.numeric(x) ) {
+ stop("Input x should be numeric", call.=FALSE)
+ }
+ rng <-range(x, na.rm=na.rm)
+
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ if(plot) {
+ plot(answer, ...)
+ }
+ return(answer)
+}
+
+rescale2(c(1:10))
+```
+provides a much more useful error message!
+(call. is when the console prints out the line of input that created the error)
+
+## Function Practice
+
+Write a function to identify the NA elemetns in two vectors:
+
+Start with a simpile example that is more conceptually manageable:
+```{r}
+x <- c( 1, 2, NA, 3, NA)
+y <- c(NA, 3, NA, 3, 4)
+```
+
+```{r}
+is.na(x)
+is.na(y)
+```
+
+but now design a function for when both vectors have simultaneous "TRUE"s:
+```{r}
+is.na(x) & is.na(y)
+```
+
+calculate how many na matches there are using summation:
+```{r}
+sum( is.na(x) & is.na(y) )
+```
+
+###Compiling this snippet into a working function
+This is my working snippet of code that I can use as the body of my first function:
+```{r}
+both_na <- function(x, y) {
+ sum( is.na(x) & is.na(y) )
+}
+```
+ test:
+```{r}
+both_na(x,y)
+```
+test2:
+```{r}
+both_na(c(NA,NA,NA),c(NA,NA,1))
+```
+test3:
+```{r}
+both_na(c(NA,NA,NA),c(1,NA,NA))
+```
+intentional break using two vectors of different lengths:
+```{r}
+both_na(c(1,NA,NA),c(1,NA,NA,NA))
+```
+
+```{r}
+both_na(c(1,NA,NA),c(1,NA,NA,NA,NA,NA))
+```
+Uh oh, R is recycling the inputs of the first vector in order to accomodate the mismatching length. In other words, it restarts from the beginning of the shorter vector to match it with the subsequent inputs in the longer vector. *we need to catch this before hand to prevent it!*
+
+###Checking that the legnth of our inputs are equal
+"!="" means not equal to
+```{r}
+x <- c(1,NA,NA)
+y <- c(1,NA,NA,NA,NA,NA)
+length(x) != length(y)
+```
+
+**failing early and loud** by stopping this process, therby preventing this erroneous recycling.
+
+both_na2 <- function(x, y) {
+ if(length(x) != length(y)) {
+ stop("Input x and y should be the same length")
+ }
+ sum( is.na(x) & is.na(y) )
+}
+# trying it out
+both_na2(c(1,NA,NA), c(1,NA,NA,NA,NA,NA))
+
+
+now with more information feedback features:
+```{r}
+both_na3 <- function(x, y) {
+ if(length(x) != length(y)) {
+ stop("Input x and y should be vectors of the same length")
+ }
+
+ na.in.both <- ( is.na(x) & is.na(y) )
+ na.number <- sum(na.in.both)
+ na.which <- which(na.in.both)
+ message("Found ", na.number, " NA's at position(s):",
+ paste(na.which, collapse=", ") )
+
+ return( list(number=na.number, which=na.which) )
+}
+
+#trying it out
+x <- c(1,NA,NA)
+y <- c(1,NA,NA)
+both_na3(x,y)
+```
+
+## Writing a Function for grade()
+grade() should determine an overall grade from a vector fo student homework scores and drop the lowest single alignment score
+
+# student 1
+
+```{r}
+student_1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
+
+student_1_sum <- sum(student_1) - min(student_1)
+
+student_1_sum / 7
+
+```
+
+
+#student 2
+```{r}
+student_2 <- c(100, NA, 90, 90, 90, 90, 97, 80)
+
+student_2_sum <- sum(student_2, na.rm=TRUE) - min(student_2,na.rm=TRUE)
+
+student_2_sum / 7
+```
+
+you can't use the trim argument in mean() because it trims both ends
+```{r}
+student_1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
+
+mean(student_1, trim=min(student_1))
+```
+
+the concise one for class:
+```{r}
+ grade <- function(x) {
+   (sum(x, na.rm=TRUE) - min(x, na.rm=TRUE))/(length(x)-1)
+ }
+grade(student_1)
+grade(student_2)
+```
+
+Now to grade all students in an example class
+```{r}
+url <- "http://tinyurl.com/gradeinput"
+students <- read.csv(url, row.names = 1) 
+head(students)
+
+
+grade <- function(x) {
+   (sum(x, na.rm=TRUE) - min(x, na.rm=TRUE))/(length(x)-1)
+}
+```
+```{r}
+grade(students[5,])
+```
+
+```{r}
+ans <- apply(students,1,grade)
+```
+
+figuring out who the top students are by sorting the averages by high to low:
+```{r}
+sort(ans, decreasing =TRUE)
+```
+
+# Intersect data example
+###one last function example...
+
+find the intersection of two vectors
+
+```{r}
+# Start with a simple version of the problem
+df1 <- data.frame(IDs=c("gene1", "gene2", "gene3"),
+ exp=c(2,1,1),
+ stringsAsFactors=FALSE)
+df2 <- data.frame(IDs=c("gene2", "gene4", "gene3", "gene5"),
+ exp=c(-2, NA, 1, 2),
+ stringsAsFactors=FALSE)
+# Simplify further to single vectors
+x <- df1$IDs
+y <- df2$IDs
+# Now what do we do?
+```
+
+google: 'R intersection of two vectors' to find out how to get us started
+
+```{r}
+x <- df1$IDs
+y <- df2$IDs
+
+
+intersect(x,y)
+```
+
+```{r}
+x %in% y
+x
+y
+```
+this has given me the indices (the position) of where the things that overlap are!
+
+and can show you which they are
+```{r}
+x[x %in% y]
+```
+
+
+
+```{r}
+gene_intersect <- function(x, y) {
+  cbind( x[x %in% y], y[ y %in% x])
+}
+```
+
+
+```{r}
+df1 <- data.frame(IDs=c("gene1", "gene2", "gene3"),
+ exp=c(2,1,1),
+ stringsAsFactors=FALSE)
+df3 <- data.frame(IDs=c("gene2", "gene2", "gene5", "gene5"),
+ exp=c(-2, NA, 1, 2),
+ stringsAsFactors=FALSE)
+
+merge(df1, df2, by="IDs")
+```
+
+
+
+
+
+
+
+
