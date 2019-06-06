@@ -1,0 +1,32 @@
+Class 13: Genome Informatics
+================
+
+Overview
+--------
+
+The purpose of this lab session is to introduce a set of tools used in highthroughput sequencing and the process of investigating interesting gene variance in Genomics, using high throughput sequencing. The tool we will be utilizing is Galaxy.
+
+We will be analyzing Childhood asthma, as several gene variants have been implicated in its pathogenesis.
+
+Identify genetic variants of interest
+-------------------------------------
+
+The four candidate SNPs are : **rs12936231**, **rs8067378**, **rs9303277**, and **rs7216389** which were found by referencing Verlaan et al. (2009) and [OMIM](http://www.omim.org).
+
+THrough the ENSEMBLE page, these variants were found to overlap with or effect the function of these three genes : **ZPBP2**, **GSDMB**, and **ORMDL3**.
+
+In the ENSEMBLE genome browser under the locations tab, the location of rs8067378 was found to be on *Chromosome 17: 39895095*; and that there are *(forward strand) A/G variants (43% G) different alleles* for rs8067378.
+
+Under *sample genotypes* &gt; Mexican Ancestry in Los Angeles, California it was discovered that 14% of the Mexican Ancestry in Los Angeles sample population (MXL) are homozygous for the asthma associated SNP (G|G).
+
+``` r
+x <- read.csv("373531-SampleGenotypes-Homo_sapiens_Variation_Sample_rs8067378.csv")
+(sum(x[,2] == "G|G") / nrow(x)) * 100
+```
+
+    ## [1] 14.0625
+
+Initial RNA-seq data
+--------------------
+
+**work in progress**
