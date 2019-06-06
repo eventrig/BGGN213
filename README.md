@@ -10,7 +10,7 @@ https://github.com/eventrig/bggn213/blob/master/class05/class_05.md)
 
 - Class 7: [R Functions and packages](https://github.com/eventrig/bggn213/blob/master/7/class07.md)
 
-- Class 8:
+- Class 8: to complete
 
 - Class 9: [Unsupervised Learning Analysis of Human Breast Cancer Cells](https://github.com/eventrig/bggn213/blob/master/class09_rework.md)
 
@@ -18,17 +18,16 @@ https://github.com/eventrig/bggn213/blob/master/class05/class_05.md)
 
 - Class 12: [Structural Bioinformatics pt. 2](https://github.com/eventrig/bggn213/blob/master/class12/class12.md)
 
-- Class 13: 
+- Class 13: to complete
 
-- Class 14: 
+- Class 14: [Importing our data into R](https://github.com/eventrig/bggn213/blob/master/class14.md)
 
-- Class 15:
+- Class 15: [Pathway Analysis from RNA-Seq Results](https://github.com/eventrig/bggn213/blob/master/class15.md)
 
-- Class 16:
 
 - Class 17: [Biological Network Analysis](https://github.com/eventrig/bggn213/blob/master/class17/class17.md)
 
-- Class 18: to be knitted...
+- Class 18: [Cancer Genomics](https://github.com/eventrig/bggn213/blob/master/class18.md)
 
 
 
