@@ -18,7 +18,7 @@ https://github.com/eventrig/bggn213/blob/master/class05/class_05.md)
 
 - Class 12: [Structural Bioinformatics pt. 2](https://github.com/eventrig/bggn213/blob/master/class12/class12.md)
 
-- Class 13: to complete
+- Class 13: to be completed...
 
 - Class 14: [Importing our data into R](https://github.com/eventrig/bggn213/blob/master/class14.md)
 
