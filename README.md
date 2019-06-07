@@ -12,7 +12,7 @@ https://github.com/eventrig/bggn213/blob/master/class05/class_05.md)
 
 - Class 8: [Principal Component Analysis (PCA)](https://github.com/eventrig/bggn213/blob/master/class08/class08.md)
 
-- Class 9: [Unsupervised Learning Analysis of Human Breast Cancer Cells](https://github.com/eventrig/bggn213/blob/master/class09_rework.md)
+- Class 9: [Unsupervised Learning Analysis of Human Breast Cancer Cells](https://github.com/eventrig/bggn213/blob/master/Documents/Academic/class9_2/class9.md)
 
 - Class 11: [Structural Bioinformatics](https://github.com/eventrig/bggn213/blob/master/class11_rework.md)
 
