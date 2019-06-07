@@ -8,7 +8,7 @@ https://github.com/eventrig/bggn213/blob/master/class05/class_05.md)
 
 - Class 6: [R Functions](https://github.com/eventrig/bggn213/blob/master/Documents/Academic/class06_yikes/class06.md)
 
-- Class 7: [R Functions and packages](https://github.com/eventrig/bggn213/blob/master/7/class07.md)
+- Class 7: [R Functions and packages](https://github.com/eventrig/bggn213/blob/master/class07/class07.md)
 
 - Class 8: [Principal Component Analysis (PCA)](https://github.com/eventrig/bggn213/blob/master/class08/class08.md)
 
