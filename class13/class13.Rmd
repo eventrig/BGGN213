@@ -1,0 +1,68 @@
+---
+title: "Class 12: Structual Bioinformatics pt. 2"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(bio3d)
+
+file <- get.pdb("1hsg")
+pdb <- read.pdb(file)
+
+pdb
+```
+
+```{r}
+prot <- atom.select(pdb, "protein", value=TRUE)
+prot
+
+write.pdb(prot, file = "1hsg_protein_1.pdb")
+
+```
+
+```{r}
+lig <- atom.select(pdb, "ligand", value=TRUE)
+lig
+
+write.pdb(lig, file ="1hse_ligand.pdb")
+```
+
+Using the AutoDock Tools (ADT) to ‘prep’ the protein and ligand files to so that each atom includes data on its charge and an atom type that describes its properties, something not default to the pdb files. THis will enable us to run the docking algorithm on this protein.
+
+We will use autodoc vina to perform the docking. Here, we process these results back in R
+
+```{r}
+res <- read.pdb("all.pdbqt", multi=TRUE)
+res
+write.pdb(res, "results.pdb")
+```
+It tells us there are 14 configurations of this model, where the computer essentially moved it around in 14 conformations to try this argument out.
+
+
+Now, comparing the docking results using the *root mean square distance*. Essentially, how close these are geometrically.
+```{r}
+# res <- read.pdb("all.pdbqt", multi=TRUE)
+ori <- read.pdb("ligand.pdbqt")
+rmsd(ori, res)
+```
+The smaller the values == the smaller the distance == the better the score.
+
+#Section 3. Exploring the conformational dynamics of proteins
+
+### 3.1 Normal Mode Analysis (NMA)
+```{r}
+library(bio3d)
+file2 <- get.pdb("1hel")
+pdb2 <- read.pdb(file2)
+modes <- nma(pdb2)
+plot(modes, sse=pdb2)
+```
+
+
+
+
+

@@ -1,0 +1,61 @@
+---
+title: "Class18: Cancer Genomics"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+#in console: BiocManager::install(c("GenomicDataCommons", "TCGAbiolinks", "maftools"))
+
+library(GenomicDataCommons)
+library(TCGAbiolinks)
+library(maftools)
+
+#check on GDC status
+status()
+```
+
+#Querying the GDC from R
+```{r}
+projects <- getGDCprojects()
+head(projects)
+```
+
+find the number of cases/patients across different projects within the GDC
+```{r}
+cases_by_project <- cases() %>%
+  facet("project.project_id") %>%     #group all cases by the project id
+  aggregations()          #counts up the cases by id
+head(cases_by_project)
+```
+
+
+```{r}
+x <- cases_by_project$project.project_id
+
+# Make a custom color vector for our plot
+colvec <- rep("lightblue", nrow(x))
+colvec[x$key=="TCGA-PAAD"] <- "red" #PAAD bar is searched for in the Key column and becomes red
+
+# Plot with 'log' for y axis and rotate labels with 'las'
+par(mar=c(8, 4, 4, 2))
+barplot(x$doc_count, names.arg=x$key, log="y", col=colvec, las=2, cex.names=0.8)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

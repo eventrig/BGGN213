@@ -1,0 +1,205 @@
+---
+title: "Class 8: Principal Component Analysis (PCA)"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#PCA of UK food data
+```{r}
+x <- read.csv("UK_foods.csv")
+```
+
+**Q1.** How many rows and columns are in your new data frame named x? What R functions could you use to answer this questions?
+
+```{r}
+nrow(x) #rows
+
+ncol(x) #columns
+
+dim(x) #both!
+```
+
+Looking at our data
+```{r}
+View(x) #entire set
+
+head(x) #look at the first six rows
+```
+
+
+Row names appear erroneous, since there's five instead of the four UK countries. One is being misunderstood as a row but is infact moreso a label.
+
+Correcting for row name/categories
+```{r}
+# Note how the minus indexing works... the more you run this the less rows there will be!
+rownames(x) <- x[,1]
+x <- x[,-1]
+head(x)
+
+dim(x) #see? fixed!
+```
+
+alternative method:
+```{r}
+x <- read.csv("UK_foods.csv", row.names=1)
+head(x)
+```
+
+##Spotting major differences and trends
+
+Looking at the table isn't very elucidating...and neither is just throwing things into a barplot.
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+
+And here it is again but where the columns of height are portrayed as stacked bars instead of as juxtaposed bars.
+```{r}
+barplot(as.matrix(x), beside=F, col=rainbow(nrow(x)))
+```
+
+Generating a pairwise plot is somewhat more helpful, at least!
+```{r}
+pairs(x, col=rainbow(10), pch=16)
+```
+
+But there's a large amount of variables in this data set (seventeen!). Let's run a PCA to better evaluate what variables are truly meaningful from this data.
+
+Observations are expected to be rows and variables are expected to be columns, so we must manipulate our data frame to fit this expectations (transpose it).
+```{r}
+# Use the prcomp() PCA function 
+pca <- prcomp( t(x) ) #t is to transpose, so the data is work-withable
+summary(pca)
+```
+
+```{r}
+# Plot PC1 vs PC2
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1], pca$x[,2], colnames(x), col = c("goldenrod2","firebrick","royalblue2","darkolivegreen4"))
+```
+
+
+Calculating the variance of the original variables, in the form of the standard deviation.
+```{r}
+v <- round( pca$sdev^2/sum(pca$sdev^2) * 100 )
+v
+```
+ or the second row here...
+```{r}
+z <- summary(pca)
+z$importance
+```
+
+Let's visualize this variance using a plot
+```{r}
+barplot(v, xlab="Principal Component", ylab="Percent Variation")
+```
+
+
+##Digging Deeper (variable loadings)
+```{r}
+## Lets focus on PC1 as it accounts for > 90% of variance 
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,1], las=2 )
+```
+ THe foods (observations) that have the largest positive loading scores push N. Ireland to the right positive side of the plot, such as soft drinks and fresh potatoes. Those foods with high negative scores will push the other countries to the left side of the plot, such as fresh fruit and alcoholic drinks.
+ 
+Below is a similar loadings plot for PC2. 
+```{r}
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,2], las=2 )
+```
+
+You can see that fresh potatoes and soft drinks are featured prominantley.
+
+##Biplots are also useful because it lets us visualize both the variables and the observations simultaneously.
+```{r}
+biplot(pca)
+```
+
+
+
+
+#PCA of RNA-seq data
+
+Accessing a small RNA-seq count data set where the columns are individual samples (cells) and rows are measurements taken for all the samples (genes).
+```{r}
+rna.data <- read.csv("expression.csv", row.names=1)
+head(rna.data)
+```
+
+
+We'll begin by skipping right to the juicy PCA, rather than waste time with barplots or the like.
+```{r}
+## Again we have to take the transpose of our data 
+pca <- prcomp(t(rna.data), scale=TRUE)
+ 
+## Simple un ploished plot of pc1 and pc2
+plot(pca$x[,1], pca$x[,2])
+```
+
+Using standard deviation to calculate how much variation in the original data that each principal component accounts for.
+```{r}
+## Variance captured per PC 
+pca.var <- pca$sdev^2
+
+## Precent variance is often more informative to look at 
+pca.var.per <- round(pca.var/sum(pca.var)*100, 1)
+pca.var.per
+```
+
+Using this variance data to generate a standard scree plot
+```{r}
+barplot(pca.var.per, main="Scree Plot", 
+        xlab="Principal Component", ylab="Percent Variation")
+```
+Almost all of the variance resides in PC1.
+
+Let's spruce up our PCA plot from before to make it more visually discernable...
+```{r}
+## A vector of colors for wt and ko samples
+colvec <- colnames(rna.data)
+colvec[grep("wt", colvec)] <- "red"  #all wild types are red
+colvec[grep("ko", colvec)] <- "blue"  #all knockouts are blue
+
+plot(pca$x[,1], pca$x[,2], col=colvec, pch=16,
+     xlab=paste0("PC1 (", pca.var.per[1], "%)"),
+     ylab=paste0("PC2 (", pca.var.per[2], "%)"))
+
+text(pca$x[,1], pca$x[,2], labels = colnames(rna.data), pos=c(rep(4,5), rep(2,5)))
+```
+
+here's an alternative to the above coloring mechanism (by sample type)
+```{r}
+#Preparing the sample information to be accessed by the plot parameters...
+## Extract the first 2 characters of the sample name
+sample.type <- substr(colnames(rna.data),1,2)
+sample.type
+
+#and then plotting
+plot(pca$x[,1], pca$x[,2], col=as.factor(sample.type), pch=16)
+```
+
+
+
+Now to find the top 10 measurements (genes) that contribute most to pc1 in either direction (+ or -):
+```{r}
+loading_scores <- pca$rotation[,1]
+
+## Find the top 10 measurements (genes) that contribute
+## most to PC1 in either direction (+ or -)
+gene_scores <- abs(loading_scores) 
+gene_score_ranked <- sort(gene_scores, decreasing=TRUE)
+
+## show the names of the top 10 genes
+top_10_genes <- names(gene_score_ranked[1:10])
+top_10_genes 
+```
+
+
+
+
+
+
