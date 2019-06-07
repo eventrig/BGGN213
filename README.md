@@ -10,7 +10,7 @@ https://github.com/eventrig/bggn213/blob/master/class05/class_05.md)
 
 - Class 7: [R Functions and packages](https://github.com/eventrig/bggn213/blob/master/7/class07.md)
 
-- Class 8: [Principal Component Analysis (PCA)](https://github.com/eventrig/bggn213/blob/master/class08.md)
+- Class 8: [Principal Component Analysis (PCA)](https://github.com/eventrig/bggn213/blob/master/class08/class08.md)
 
 - Class 9: [Unsupervised Learning Analysis of Human Breast Cancer Cells](https://github.com/eventrig/bggn213/blob/master/class09_rework.md)
 
