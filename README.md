@@ -14,7 +14,7 @@ https://github.com/eventrig/bggn213/blob/master/class05/class_05.md)
 
 - Class 9: [Unsupervised Learning Analysis of Human Breast Cancer Cells](https://github.com/eventrig/bggn213/blob/master/Documents/Academic/class9_2/class9.md)
 
-- Class 11: [Structural Bioinformatics](https://github.com/eventrig/bggn213/blob/master/class11_rework.md)
+- Class 11: [Structural Bioinformatics](https://github.com/eventrig/bggn213/blob/master/Documents/Academic/class11_2/class11.md)
 
 - Class 12: [Structural Bioinformatics pt. 2](https://github.com/eventrig/bggn213/blob/master/class12/class12.md)
 
