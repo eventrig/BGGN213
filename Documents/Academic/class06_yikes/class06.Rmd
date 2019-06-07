@@ -1,0 +1,268 @@
+---
+title: "Class 6: R Functions"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##Section 1. Writing Functions
+Today we will focuso n **R FUnctions** but we will start with a bit of file reading.
+
+###Example plot
+```{r}
+plot(1:10, type="l", col="blue")
+```
+
+###Making a table for each of the three test files
+
+We're keeping in mind what characters separate each variables in the columns and whether they have headers or not.
+```{r}
+read.table("test1.txt", header=TRUE, sep=",") #commas separate the variables
+```
+
+```{r}
+read.table("test2.txt", header=TRUE, sep="$") #Dollar signs separate the variables
+```
+
+```{r}
+read.table("test3.txt") #the default sep= for read.table is tab, which means no input needed!
+```
+
+You can even command R to draw data from a link to a file.
+```{r}
+read.csv("https://bioboot.github.io/bggn213_S19/class-material/test1.txt")
+```
+
+##Writing functions
+Here is the general outline/syntax of writing a function:
+
+```{r}
+name.of.function <- function(argument1, argument2) {
+ statements
+ return(something)
+}
+
+square.it <- function(x) {  #making a function called square.it
+ square <- x * x
+ return(square)
+}
+
+
+# square a number
+square.it(5)
+```
+
+square a vector
+```{r}
+square.it(c(1, 4, 2))
+```
+
+even a matrix
+```{r}
+matrix1 <- cbind(c(3, 10), c(4, 5))
+square.it(matrix1)
+```
+
+Here we make a custom function called "add" that requires an input x and a default input for y is provided (which is one). The function itself will add the x input given to the default y of 1.
+```{r}
+add <- function(x,y=1) {
+  # here is the body of the code
+  x + y 
+}
+```
+
+Testing our new function out, expecting to get the value of 4 + 1:
+
+
+```{r}
+add (4)
+```
+
+Just because the y have a default input, however, doesn't mean we can't change it later by providing the variable identity and the equal sign, followed by the new value we are temporarily inserting into the function. Here is an example where we expect the code to add 4 and 5:
+```{r}
+add(4, y=5)
+```
+
+You can vectorize this function, too, making your function have greater computational use!
+```{r}
+add( c(1,2,3), 1)
+```
+
+However, you can't vectorize with just any syntax. Using commas indicates to R that there are different arguments being input into a function, when in actuality you intend to input a vector. For example:
+```{r}
+#add(1,2,3)
+```
+See, this doesn't work because it's not a vector but three separate arguments. Our function only even has an x and y component written for it.
+
+
+##Utilizing functions: Range
+```{r}
+rescale <- function(x, na.rm=TRUE) { #here we also have it neglect any na data!
+ rng <-range(x, na.rm = TRUE)  #function within a function for cleanliness and clarity
+ (x - rng[1]) / (rng[2] - rng[1])
+}
+
+rescale(c(1, 3, NA, 5, 10))
+```
+
+```{r}
+x <- c(1, 3, NA, 5, 10) 
+ rng <-range(x, na.rm = TRUE)
+ rng
+```
+
+
+```{r}
+(x - rng[1]) / (rng[2] - rng[1])
+```
+
+##Utlizing Functions: Rescale
+```{r}
+rescale <- function(x) {
+  rng <-range(x)
+ (x - rng[1]) / (rng[2] - rng[1])
+}
+```
+
+Here we will implement if/else conditional statements! This allows R to compute whether one condition is met or not and will run unique functions for each.
+```{r}
+rescale2 <- function(x, na.rm=TRUE, plot=FALSE) {
+ if(na.rm) {
+ rng <-range(x, na.rm=na.rm)
+ } else {
+ rng <-range(x)
+ }
+ print("Hello")
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ print("is it me you are looking for?")
+ if(plot) {
+ plot(answer, typ="b", lwd=4)
+ }
+ print("I can see it in ...")
+}
+
+rescale2(1:10)
+```
+
+
+```{r}
+rescale3 <- function(x, na.rm=TRUE, plot=TRUE) {
+ if(na.rm) {
+ rng <-range(x, na.rm=TRUE)
+ } else {
+ rng <-range(x)
+ }
+ print("Hello")
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ return(answer)
+ print("is it me you are looking for?")
+ if(plot) {
+ plot(answer, typ="b", lwd=4)
+ }
+ print("I can see it in ...")
+}
+
+rescale3(1:10)
+```
+
+##On simplifying functions...
+First we'll load up the package we've installed and will be using henceforth.
+```{r}
+library(bio3d)
+```
+
+##Improving code
+Here we will be working with this snippet of code to modify any mistakes (copy paste errors!) and etcetera.
+```{r}
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+```
+
+Here's the corrected version of code:
+```{r}
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s3, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+```
+
+##Answering questions about this code
+Q1. What type of object is returned from the read.pdb() function?
+reads PDB files
+
+Q2. What does the trim.pdb() function do?
+Trims a PDB object to a subset of atoms. It produces a smaller PDB object from a larger one. This was discovered by copy&pasting the relevant lines of code by themselves, to isolate their output.
+
+Q3. What input parameter would turn off the marginal black and grey rectangles in the plots and what do they represent in this case?
+in the plotb3 function, override the default argument for top and for bot to equal FALSE, rather than TRUE. They represent the beta strands and alpha helices (2º structure annotations).
+
+what the plots look like without these:
+```{r}
+# without the secondary features plotted
+library(bio3d)
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s3, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor", top = FALSE, bot = FALSE)
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor", top = FALSE, bot = FALSE)
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor", top = FALSE, bot = FALSE)
+```
+Q4. What would be a better plot to compare across the different proteins?
+a dendogram
+
+Q5. Which proteins are more similar to each other in their B-factor trends. How could you quantify this?
+```{r}
+hc <- hclust( dist( rbind(s1.b, s2.b, s3.b) ) )
+plot(hc)
+```
+s2.b and s3.b are most similar to one another
+
+rbind will "pair up" the matricies of separate data sets by their rows, whereas cbind would do columns.
+```{r}
+rbind(s1.b, s2.b, s3.b)
+```
+
+###Below is the workout of my homework portion of this lab
+Q6:
+final
+```{r}
+# entering in the PDB files you want to work with
+
+b1 <- trim.pdb(read.pdb("1E4Y"), chain="A", elety="CA")$atom$b    # kinase with drug
+b2 <- trim.pdb(read.pdb("4AKE"), chain="A", elety="CA")$atom$b    # kinase with drug
+b3 <-trim.pdb(read.pdb("1AKE"), chain="A", elety="CA")$atom$b     # kinase no drug
+
+# self defined function to assemble the dendograph of each three PDB objects
+hc_plot <- function (x,y,z) {
+  hclust( dist( rbind(x, y, z)) )
+}
+
+# plotting out the created dendogram, provides a single graph providing a B-factor trends comparison
+  plot( hc_plot(b1, b2, b3) )
+```
+
