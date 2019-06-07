@@ -26,7 +26,7 @@ https://github.com/eventrig/bggn213/blob/master/class05/class_05.md)
 
 - Class 17: [Biological Network Analysis](https://github.com/eventrig/bggn213/blob/master/class17/class17.md)
 
-- Class 18: [Cancer Genomics](https://github.com/eventrig/bggn213/blob/master/class18.md)
+- Class 18: [Cancer Genomics](https://github.com/eventrig/bggn213/blob/master/Documents/Academic/class18_2/class18.md)
 
 
 
