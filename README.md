@@ -22,7 +22,7 @@ https://github.com/eventrig/bggn213/blob/master/class05/class_05.md)
 
 - Class 14: [Importing our data into R](https://github.com/eventrig/bggn213/blob/master/class14.md)
 
-- Class 15: [Pathway Analysis from RNA-Seq Results](https://github.com/eventrig/bggn213/blob/master/class15.md)
+- Class 15: [Pathway Analysis from RNA-Seq Results](https://github.com/eventrig/bggn213/blob/master/Documents/Academic/class15_2/class15.md)
 
 - Class 17: [Biological Network Analysis](https://github.com/eventrig/bggn213/blob/master/class17/class17.md)
 
