@@ -6,7 +6,7 @@ My class content includes:
 - Class 5: [Data exploration and visualization in R](
 https://github.com/eventrig/bggn213/blob/master/class05/class_05.md)
 
-- Class 6: [R Functions](https://github.com/eventrig/bggn213/blob/master/class06_rework.md)
+- Class 6: [R Functions](https://github.com/eventrig/bggn213/blob/master/Documents/Academic/class06_yikes/class06.md)
 
 - Class 7: [R Functions and packages](https://github.com/eventrig/bggn213/blob/master/7/class07.md)
 
