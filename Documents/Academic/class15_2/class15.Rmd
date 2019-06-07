@@ -1,0 +1,220 @@
+---
+title: "Class 15: Pathway Analysis from RNA-Seq Results"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+#BiocManager::install("DESeq2")
+library(DESeq2)
+```
+
+```{r}
+#my first inclination:
+#meta <- read.csv("GSE37704_metadata.csv")
+
+#featcount <- read.csv("GSE37704_featurecounts.csv")
+```
+
+```{r}
+#That of the project
+metaFile <- "GSE37704_metadata.csv"
+countFile <- "GSE37704_featurecounts.csv"
+
+# Import metadata and take a peak
+colData = read.csv(metaFile, row.names=1)
+countData = read.csv(countFile, row.names =1)
+head(colData)
+```
+We need the first column of the meta to match that of the count data; thus, there's an interferring 'length' column in the count data set that must be removed.
+
+###Removing the length column
+```{r}
+countData <- as.matrix(countData[,-1])
+head(countData)
+```
+An Additional way
+```{r}
+#countData$length <- NULL
+#head(countData)
+```
+
+```{r}
+zero.inds <- rowSums(countData) == 0
+
+head(countData[-zero.inds, ])
+```
+
+```{r}
+dds = DESeqDataSetFromMatrix(countData=countData,
+                             colData=colData,
+                             design=~condition)
+dds = DESeq(dds)
+```
+HoxA1 knockdown versus control siRNA
+
+
+```{r}
+res = results(dds)
+
+summary(res)
+```
+**Volcano plot**
+```{r}
+plot( res$log2FoldChange, -log(res$padj) )
+abline(v=c(-2,2), col="green", lwd=2)
+abline(h=-log(0.01), col="green", lwd=2)
+```
+Now coloring this plot: below the horizontal line = red outside of the vertical lilnes = blue
+
+```{r}
+#creating the custom color vector
+mycols <- rep("gray", nrow(res) )
+
+#red points for outside the cental chunk
+mycols[ abs(res$log2FoldChange) > 2 ] <- "red"
+
+# Blue points
+inds <- (res$padj < 0.01) & (abs(res$log2FoldChange) > 2 )
+mycols[ inds ] <- "blue"
+
+plot( res$log2FoldChange,  -log(res$padj), 
+ col=mycols, ylab="-Log(P-value)", xlab="Log2(FoldChange)" )
+```
+
+###Adding Gene Annotation
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+```
+
+
+```{r}
+#pulling up the 'cheat sheet'
+columns(org.Hs.eg.db)
+```
+
+```{r}
+res$symbol = mapIds(org.Hs.eg.db,
+                    keys=row.names(res), # Our genenames
+                     keytype="ENSEMBL",        # The format of our genenames
+                     column="SYMBOL",          # The new format we want to add
+                    multiVals="first")
+```
+
+```{r}
+res$entrez = mapIds(org.Hs.eg.db,
+                    keys=row.names(res),
+                    keytype="ENSEMBL",
+                    column="ENTREZID",
+                    multiVals="first")
+```
+
+```{r}
+res$name =   mapIds(org.Hs.eg.db,
+                    keys=row.names(res),
+                    keytype="ENSEMBL",
+                    column="GENENAME",
+                    multiVals="first")
+```
+
+```{r}
+head(res, 10)
+```
+
+```{r}
+res = res[order(res$pvalue),]
+write.csv(res, file="deseq_results.csv")
+```
+
+##Kegg Pathway
+```{r}
+library(pathview)
+```
+
+```{r}
+library(gage)
+library(gageData)
+
+data(kegg.sets.hs) #KEGG data set we're using
+data(sigmet.idx.hs) #flies data set we're using
+
+# Focus on signaling and metabolic pathways only
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
+
+# Examine the first 3 pathways
+head(kegg.sets.hs, 3)
+```
+See how there are more genes involved in Purine metabolism compared to Caffeine metabolism?
+
+Works with ENtrezIDs
+
+The gage package wants a vector as input with our numeric scores of interest.
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+
+# Get the results
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+
+attributes(keggres)
+```
+
+```{r}
+head(keggres$less)
+```
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+```
+
+
+```{r}
+# A different PDF based output of the same data
+pathview(gene.data=foldchanges, pathway.id="hsa04110", kegg.native=FALSE)
+```
+
+```{r}
+# Focus on top 5 upregulated pathways here for demo purposes only
+keggrespathways <- rownames(keggres$greater)[1:5]
+
+# Extract the 8 character long IDs part of each string
+
+keggresids = substr(keggrespathways, start=1, stop=8) #Extract or replace substrings in a character vector.
+keggresids
+```
+
+```{r}
+# pass these IDs in keggresids to the pathview() function to draw plots for all the top 5 pathways
+pathview(gene.data=foldchanges, pathway.id=keggresids, species="hsa")
+```
+##Section 3. Gene Ontology
+Doing a similar task but with a different resource
+```{r}
+data(go.sets.hs)
+data(go.subs.hs)
+
+# Focus on Biological Process subset of GO
+gobpsets = go.sets.hs[go.subs.hs$BP]
+
+gobpres = gage(foldchanges, gsets=gobpsets, same.dir=TRUE)
+
+lapply(gobpres, head)
+```
+##Section 4. Reactome Analysis
+Reactome is database consisting of biological molecules and their relation to pathways and processes. Reactome, such as many other tools, has both online software and R packages available.
+```{r}
+#output the list of significant genes at the 0.05 level as a plain text file
+sig_genes <- res[res$padj <= 0.05 & !is.na(res$padj), "symbol"]
+print(paste("Total number of significant genes:", length(sig_genes)))
+```
+
+```{r}
+write.table(sig_genes, file="significant_genes.txt", row.names=FALSE, col.names=FALSE, quote=FALSE)
+```
+to perform pathway analysis online go to the Reactome website (https://reactome.org/PathwayBrowser/#TOOL=AT)
