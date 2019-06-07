@@ -1,0 +1,182 @@
+---
+title: "Class 11: Foundatons of Bioinformatics"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Introduction to the RCSB Protein Data Bank (PDB)
+**Visualizing the HIV-1 protease structure**
+
+First, let's load up the packages we'll be utilizing
+```{r}
+library(bio3d)
+library(bio3d.view)
+```
+
+as well as accessing our pdb file
+```{r}
+pdb <- read.pdb("1hsg")
+
+pdb
+```
+
+### Familizarizing ourselves with accessing this data
+
+How to find the attributes of this object
+```{r}
+attributes(pdb)
+```
+
+Accessing individual attribtures
+```{r}
+head(pdb$atom)
+```
+
+Print a summary of the coordinate data in $xyz
+```{r}
+pdb$xyz
+```
+
+```{r}
+# Examine the row and column dimensions
+dim(pdb$xyz)
+
+# Print coordinates for the first two atom
+pdb$xyz[ 1, atom2xyz(1:2) ]
+```
+
+###Using Atom Select
+```{r}
+# Select all C-alpha atoms (return their indices)
+ca.inds <- atom.select(pdb, "calpha")
+ca.inds
+```
+
+```{r}
+# Print details of the first few selected atoms
+head( pdb$atom[ca.inds$atom, ] )
+
+# And selected xyz coordinates
+head( pdb$xyz[, ca.inds$xyz] )
+```
+
+**Fine-grained
+```{r}
+# Select chain A
+a.inds <- atom.select(pdb, chain="A")
+# Select C-alphas of chain A
+ca.inds <- atom.select(pdb, "calpha", chain="A")
+# We can combine multiple selection criteria to return their intersection
+cab.inds <- atom.select(pdb, elety=c("CA","CB"), chain="A",
+resno=10:20)
+```
+
+###Creating a protein- and ligand-only PDB file through R
+We will use the Bio3D function *atom.select()* followed by the write.pdb() functions, which will isolate the components we want and create a new file for us to access later.
+```{r}
+prot <- atom.select(pdb, "protein", value=TRUE)
+prot #protein only
+
+write.pdb(prot, file="1hsg_protein.pdb")
+
+
+lig <- atom.select(pdb, "ligand", value=TRUE)
+lig #ligand only
+
+write.pdb(lig, file="1hsg_ligand.pdb")
+```
+
+Let's take a look at the files we generated
+```{r}
+view(lig)
+
+view(prot)
+
+view(pdb, "overview", col="sse")
+```
+
+```{r}
+# Load the package
+pdb <- read.pdb("1hel")
+# Normal mode analysis calculation
+modes <- nma(pdb)
+m7 <- mktrj(modes,
+ mode=7,
+ file="mode_7.pdb")
+view(m7, col=vec2color( rmsf(m7) ))
+```
+
+###Working with multiple PDB files
+**aligning multiple structures**
+```{r}
+# Download some example PDB files
+ids <- c("1TND_B","1AGR_A","1TAG_A","1GG2_A","1KJY_A","4G5Q_A")
+files <- get.pdb(ids, split = TRUE)
+
+# Extract and align the chains we are interested in
+pdbs <- pdbaln(files, fit = TRUE) #this superimposes the molecules
+
+# Print to screen the superimposion of the 'pdbs' object
+pdbs
+```
+
+Let's take a peak at the new data, then go on to analyze it more deeply. Ultimately, we want to produce a PCA to analyze the most significant structural variations within this superimposition of structures we have generated.
+```{r}
+# Access the first 5 rows, and 8 columns
+pdbs$ali[1:5, 1:8]
+```
+
+```{r}
+# Associated residues numbers
+pdbs$resno[1:5, 1:8]
+```
+
+###Basic structure Analysis
+```{r}
+# Calculate sequence identity
+seqidentity(pdbs)
+```
+
+```{r}
+# Calculate RMSD
+rmsd(pdbs)
+```
+
+```{r}
+# Calculate RMSD
+rd <- rmsd(pdbs)
+# Clustering
+hc <- hclust(as.dist(rd))
+grps <- cutree(hc, k=3)
+# Plot results as dendrogram
+hclustplot(hc, k=3)
+```
+
+**Principal component analysis**
+```{r}
+# Perform PCA
+pc.xray <- pca(pdbs)
+
+# Plot our results summary (PCA score plot and scree-plot)
+plot(pc.xray)
+```
+
+```{r}
+# Visualize first principal component
+pc1 <- mktrj(pc.xray, pc=1, file="pc_1.pdb")
+```
+
+```{r}
+library(bio3d.view)
+# Structural displacements captured by PC1
+view(pc1)
+# The rglwidget() function from the rgl
+# package will show output in your Rmd
+# notebook and rendered html_output
+# documents
+#library(rgl)
+#rglwidget(pc1)
+```
